@@ -21,49 +21,34 @@ export class News extends Component {
     this.state = {
       articles: [],
       loading: false,
-      page: 1,
-      totalArticles: 0,
-      lastPage: 1,
+      page: 1
     };
-    // console.log("Inside News Class Constructor");
   }
 
-  async fetchDataForPage(pageNumber) {
-    let apiUrl = `https://newsapi.org/v2/top-headlines?apiKey=e3d9358097584900842dae7d52d7906b&country=${this.props.country}&category=${this.props.category}&page=${pageNumber}&pageSize=${this.props.pageSize}`;
+  async fetchDataForPage() {
+    let apiUrl = `https://newsapi.org/v2/top-headlines?apiKey=e3d9358097584900842dae7d52d7906b&country=${this.props.country}&category=${this.props.category}&page=${this.state.page}&pageSize=${this.props.pageSize}`;
     this.setState({ loading: true });
     let response = await fetch(apiUrl);
     let parsedData = await response.json();
-    let lastPageNum = Math.ceil(parsedData.totalResults / this.props.pageSize);
     console.log(parsedData);
     this.setState({
       totalArticles: parsedData.totalResults,
       articles: parsedData.articles,
-      lastPage: lastPageNum,
-      loading: false,
+      loading: false
     });
   }
 
   async componentDidMount() {
-    console.log("Inside Component Did Mount");
-    this.fetchDataForPage(this.state.page);
+    this.fetchDataForPage();
   }
 
   handlePrevClick = async () => {
-    let currentPage = this.state.page;
-    if (currentPage !== 1) {
-      this.setState({ page: currentPage - 1 });
-      this.fetchDataForPage(currentPage - 1);
-    }
-    console.log("Inside PrevClick" + this.state.page);
+      //The set state method being an async one doesnt needs to be used with callback as below for the function which plans to use the updated state immediately.
+      this.setState({ page: this.state.page - 1 },()=>{this.fetchDataForPage()});
   };
 
   handleNextClick = async () => {
-    let currentPage = this.state.page;
-    if (currentPage + 1 <= this.state.lastPage) {
-      this.setState({ page: currentPage + 1 });
-      this.fetchDataForPage(currentPage + 1);
-    }
-    console.log("Inside NextClick" + this.state.page);
+      this.setState({ page: this.state.page + 1 },()=>{this.fetchDataForPage()});
   };
 
   render() {
@@ -87,7 +72,7 @@ export class News extends Component {
           <button type="button" disabled={this.state.page === 1 ? true : false} onClick={this.handlePrevClick} className="btn btn-primary">
             &laquo; Previous
           </button>
-          <button type="button" disabled={this.state.page === this.state.lastPage ? true : false} onClick={this.handleNextClick} className="btn btn-primary">
+          <button type="button" disabled={this.state.page >= Math.ceil(this.state.totalArticles / this.props.pageSize)? true : false} onClick={this.handleNextClick} className="btn btn-primary">
             Next &raquo;
           </button>
         </div>
