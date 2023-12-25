@@ -1,11 +1,21 @@
 import React, { Component } from "react";
 import NewsItem from "./NewsItem";
-import PropTypes from 'prop-types';
-import Spinner from './Spinner';
+import PropTypes from "prop-types";
+import Spinner from "./Spinner";
 
 //Constructor->Render->ComponentDidMount .This is the order of execution
 
 export class News extends Component {
+  static defaultProps = {
+    pageSize: 8,
+    country: "in",
+  };
+
+  static propTypes = {
+    pageSize: PropTypes.number,
+    country: PropTypes.string.isRequired,
+  };
+
   constructor() {
     super();
     this.state = {
@@ -13,14 +23,14 @@ export class News extends Component {
       loading: false,
       page: 1,
       totalArticles: 0,
-      lastPage: 1
+      lastPage: 1,
     };
     // console.log("Inside News Class Constructor");
   }
 
   async fetchDataForPage(pageNumber) {
-    let apiUrl = `https://newsapi.org/v2/top-headlines?apiKey=e3d9358097584900842dae7d52d7906b&country=in&category=general&page=${pageNumber}&pageSize=${this.props.pageSize}`;
-    this.setState({loading:true});
+    let apiUrl = `https://newsapi.org/v2/top-headlines?apiKey=e3d9358097584900842dae7d52d7906b&country=${this.props.country}&category=${this.props.category}&page=${pageNumber}&pageSize=${this.props.pageSize}`;
+    this.setState({ loading: true });
     let response = await fetch(apiUrl);
     let parsedData = await response.json();
     let lastPageNum = Math.ceil(parsedData.totalResults / this.props.pageSize);
@@ -29,7 +39,7 @@ export class News extends Component {
       totalArticles: parsedData.totalResults,
       articles: parsedData.articles,
       lastPage: lastPageNum,
-      loading:false
+      loading: false,
     });
   }
 
@@ -62,15 +72,16 @@ export class News extends Component {
     return (
       <div className="container my-3">
         <h1 className="text-center mb-3">NewsNest- Top Headlines For You</h1>
-        {this.state.loading && <Spinner/>}
+        {this.state.loading && <Spinner />}
         <div className="row">
-          {!this.state.loading && this.state.articles.map((element) => {
-            return (
-              <div className="col-md-4" key={element.url}>
-                <NewsItem title={element.title !== null ? element.title : " "} description={element.description !== null ? element.description : " "} imageUrl={element.urlToImage !== null ? element.urlToImage : defaultImageUrl} newsUrl={element.url} />
-              </div>
-            );
-          })}
+          {!this.state.loading &&
+            this.state.articles.map((element) => {
+              return (
+                <div className="col-md-4" key={element.url}>
+                  <NewsItem title={element.title !== null ? element.title : " "} description={element.description !== null ? element.description : " "} imageUrl={element.urlToImage !== null ? element.urlToImage : defaultImageUrl} newsUrl={element.url} />
+                </div>
+              );
+            })}
         </div>
         <div className="container d-flex justify-content-between">
           <button type="button" disabled={this.state.page === 1 ? true : false} onClick={this.handlePrevClick} className="btn btn-primary">
@@ -84,15 +95,5 @@ export class News extends Component {
     );
   }
 }
-
-News.propTypes={
-    pageSize:PropTypes.number
-}
-
-News.defaultProps={
-    pageSize: 20
-};
-
-
 
 export default News;
