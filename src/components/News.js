@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import InfiniteScroll from "react-infinite-scroll-component";
 import NewsItem from "./NewsItem";
 import PropTypes from "prop-types";
 import Spinner from "./Spinner";
@@ -20,8 +21,9 @@ export class News extends Component {
     super();
     this.state = {
       articles: [],
-      loading: false,
-      page: 1
+      loading: true,
+      page: 1,
+      totalResults: 0
     };
   }
 
@@ -43,12 +45,30 @@ export class News extends Component {
   }
 
   handlePrevClick = async () => {
-      //The set state method being an async one doesnt needs to be used with callback as below for the function which plans to use the updated state immediately.
-      this.setState({ page: this.state.page - 1 },()=>{this.fetchDataForPage()});
+    //The set state method being an async one doesnt needs to be used with callback as below for the function which plans to use the updated state immediately.
+    this.setState({ page: this.state.page - 1 }, () => {
+      this.fetchDataForPage();
+    });
   };
 
   handleNextClick = async () => {
-      this.setState({ page: this.state.page + 1 },()=>{this.fetchDataForPage()});
+    this.setState({ page: this.state.page + 1 }, () => {
+      this.fetchDataForPage();
+    });
+  };
+
+  fetchMoreData = async () => {
+    this.setState({ page: this.state.page + 1 },async ()=>{
+        let apiUrl = `https://newsapi.org/v2/top-headlines?apiKey=e3d9358097584900842dae7d52d7906b&country=${this.props.country}&category=${this.props.category}&page=${this.state.page}&pageSize=${this.props.pageSize}`;
+        let response = await fetch(apiUrl);
+        let parsedData = await response.json();
+        console.log(parsedData);
+        this.setState({
+          totalArticles: parsedData.totalResults,
+          articles: this.state.articles.concat(parsedData.articles),
+          loading: false
+        });
+    });
   };
 
   render() {
@@ -57,25 +77,36 @@ export class News extends Component {
     return (
       <div className="container my-3">
         <h1 className="text-center mb-3">NewsNest- Top Headlines For You</h1>
-        {this.state.loading && <Spinner />}
-        <div className="row">
-          {!this.state.loading &&
-            this.state.articles.map((element) => {
-              return (
-                <div className="col-md-4" key={element.url}>
-                  <NewsItem title={element.title !== null ? element.title : " "} description={element.description !== null ? element.description : " "} imageUrl={element.urlToImage !== null ? element.urlToImage : defaultImageUrl} newsUrl={element.url} publishedAt={element.publishedAt} author={element.author} source={element.source.name}/>
-                </div>
-              );
-            })}
-        </div>
-        <div className="container d-flex justify-content-between">
-          <button type="button" disabled={this.state.page === 1 ? true : false} onClick={this.handlePrevClick} className="btn btn-primary">
-            &laquo; Previous
-          </button>
-          <button type="button" disabled={this.state.page >= Math.ceil(this.state.totalArticles / this.props.pageSize)? true : false} onClick={this.handleNextClick} className="btn btn-primary">
-            Next &raquo;
-          </button>
-        </div>
+        <InfiniteScroll
+          dataLength={this.state.articles.length} //This is important field to render the next data
+          next={this.fetchMoreData}
+          hasMore={this.state.articles.length !== this.state.totalArticles}
+          loader={<Spinner />}
+          style={{overflow:"hidden", display: "flex", flexDirection:"column"}}
+          endMessage={
+            <p style={{ textAlign: "center" }}>
+              <b>Yay! You have seen it all</b>
+            </p>
+          }
+          >
+            <div className="row">
+              {this.state.articles.map((element) => {
+                return (
+                  <div className="col-md-4" key={element.url}>
+                    <NewsItem
+                      title={element.title !== null ? element.title : " "}
+                      description={element.description !== null ? element.description : " "}
+                      imageUrl={element.urlToImage !== null ? element.urlToImage : defaultImageUrl}
+                      newsUrl={element.url}
+                      publishedAt={element.publishedAt}
+                      author={element.author}
+                      source={element.source.name}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+        </InfiniteScroll>
       </div>
     );
   }
