@@ -15,6 +15,7 @@ export class News extends Component {
   static propTypes = {
     pageSize: PropTypes.number,
     country: PropTypes.string.isRequired,
+    setProgress: PropTypes.func.isRequired
   };
 
   constructor() {
@@ -27,14 +28,16 @@ export class News extends Component {
   }
 
   async fetchDataForPage() {
-    let apiUrl = `https://newsapi.org/v2/top-headlines?apiKey=e3d9358097584900842dae7d52d7906b&country=${this.props.country}&category=${this.props.category}&page=${this.state.page}&pageSize=${this.props.pageSize}`;
+    let apiUrl = `https://newsapi.org/v2/top-headlines?apiKey=a3859bd7b1b4435d857be01a8e976615&country=${this.props.country}&category=${this.props.category}&page=${this.state.page}&pageSize=${this.props.pageSize}`;
+    this.props.setProgress(30);
     let response = await fetch(apiUrl);
+    this.props.setProgress(60);
     let parsedData = await response.json();
     console.log(parsedData);
     this.setState({
       totalArticles: parsedData.totalResults,
       articles: parsedData.articles
-    });
+    },()=>{this.props.setProgress(100)});
   }
 
   async componentDidMount() {
@@ -43,10 +46,9 @@ export class News extends Component {
 
   fetchMoreData = async () => {
     this.setState({ page: this.state.page + 1 },async ()=>{
-        let apiUrl = `https://newsapi.org/v2/top-headlines?apiKey=e3d9358097584900842dae7d52d7906b&country=${this.props.country}&category=${this.props.category}&page=${this.state.page}&pageSize=${this.props.pageSize}`;
+        let apiUrl = `https://newsapi.org/v2/top-headlines?apiKey=a3859bd7b1b4435d857be01a8e976615&country=${this.props.country}&category=${this.props.category}&page=${this.state.page}&pageSize=${this.props.pageSize}`;
         let response = await fetch(apiUrl);
         let parsedData = await response.json();
-        console.log(parsedData);
         this.setState({
           totalArticles: parsedData.totalResults,
           articles: this.state.articles.concat(parsedData.articles)
@@ -71,7 +73,7 @@ export class News extends Component {
             </p>
           }
           >
-            <div className="row" style={{width:'100%'}}>
+            <div className="row" style={{width:'100%', alignSelf:"center"}}>
               {this.state.articles.map((element) => {
                 return (
                   <div className="col-md-4" key={element.url}>
