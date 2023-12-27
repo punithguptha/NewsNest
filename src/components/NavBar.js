@@ -6,6 +6,7 @@ Link
 
 const NavBar =()=> {
     return (
+      <div className="fixed-top">
       <nav className="navbar navbar-expand-lg bg-body-tertiary">
         <div className="container-fluid">
           <Link className="navbar-brand" to="/">
@@ -65,6 +66,8 @@ const NavBar =()=> {
           </div>
         </div>
       </nav>
+      </div>
+
     );
 }
 
