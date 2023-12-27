@@ -9,7 +9,8 @@ export class NavBar extends Component {
 
   render() {
     return (
-      <nav className="navbar navbar-expand-lg bg-body-tertiary">
+      <div>
+      <nav className="navbar fixed-top navbar-expand-lg bg-body-tertiary">
         <div className="container-fluid">
           <Link className="navbar-brand" to="/">
             NewsNest
@@ -68,6 +69,7 @@ export class NavBar extends Component {
           </div>
         </div>
       </nav>
+      </div>
     );
   }
 }
