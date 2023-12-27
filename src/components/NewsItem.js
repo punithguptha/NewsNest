@@ -1,13 +1,12 @@
-import React, { Component } from "react";
+import React from "react";
 
-export class NewsItem extends Component {
-  getGMTTime = (dateString) => {
+const NewsItem =(props)=> {
+  const getGMTTime = (dateString) => {
     let dateObj = new Date(dateString);
     return dateObj.toGMTString();
   };
 
-  render() {
-    let { title, description, imageUrl, newsUrl, author, publishedAt, source } = this.props;
+    let { title, description, imageUrl, newsUrl, author, publishedAt, source } = props;
     return (
       <div className="my-3">
         <div className="card">
@@ -25,13 +24,12 @@ export class NewsItem extends Component {
           </div>
           <div className="card-footer">
             <small className="text-body-secondary">
-              By {author ? author : "Unknown"} at {this.getGMTTime(publishedAt)}
+              By {author ? author : "Unknown"} at {getGMTTime(publishedAt)}
             </small>
           </div>
         </div>
       </div>
     );
-  }
 }
 
 export default NewsItem;
